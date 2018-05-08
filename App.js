@@ -31,6 +31,7 @@ export default class App extends Component<Props> {
       end: '',
       started: '',
       results: [],
+      status: '',
       partialResults: [],
       currentTime: 0.0,
       recording: false,
@@ -49,6 +50,7 @@ export default class App extends Component<Props> {
     Voice.onSpeechPartialResults = this.onSpeechPartialResults.bind(this);
     Voice.onSpeechVolumeChanged = this.onSpeechVolumeChanged.bind(this);
     this._startRecognizing = this._startRecognizing.bind(this)
+    this._stopRecognizing = this._stopRecognizing.bind(this)
   }
   componentDidMount(){
     this._startRecognizing()
@@ -116,9 +118,9 @@ export default class App extends Component<Props> {
       }
     }
 
-    async _stop() {
+    async _stop() {      
       if (!this.state.recording) {
-        console.warn('Can\'t stop, not recording!');
+        // console.warn('Can\'t stop, not recording!');
         return;
       }
 
@@ -137,6 +139,7 @@ export default class App extends Component<Props> {
     }
 
     async _play() {
+      
       if (this.state.recording) {
         await this._stop();
       }
@@ -163,8 +166,9 @@ export default class App extends Component<Props> {
     }
 
     async _record() {
+      
       if (this.state.recording) {
-        console.warn('Already recording!');
+        // console.warn('Already recording!');
         return;
       }
 
@@ -222,20 +226,29 @@ export default class App extends Component<Props> {
     let length=this.state.results[0].split(' ').length
     console.log('++',length,e.value[0].split(' ')[length-1])
    
-      if(e.value[0].split(' ')[length-1].toLowerCase()==='start') this._record()
-      if(e.value[0].split(' ')[length-1].toLowerCase()==='stop') this._stop()
+      if(e.value[0].split(' ')[length-1].toLowerCase()==='start') {
+        this.setState({status: 'recording...'},()=>{
+          this._record()
+        })
+      }
+      if(e.value[0].split(' ')[length-1].toLowerCase()==='stop') {
+        this.setState({status: 'stoped!'},()=>{
+          // this._stop()
+        })
+      }//this._stop()
       if(e.value[0].split(' ')[length-1].toLowerCase()==='play') {
-        this._stopRecognizing.bind(this)
-        this._play()
+        // this._stopRecognizing()
+        // this._play()
+        this.setState({status: 'playing now ......'},()=>{
+          this._play()
+        })
       }
     
     
   }
 
   onSpeechPartialResults(e) {
-    this.setState({
-      partialResults: e.value,
-    });
+    console.log('=========================',e.value)
   }
 
   onSpeechVolumeChanged(e) {
@@ -301,9 +314,9 @@ export default class App extends Component<Props> {
         <Text style={styles.welcome}>
           Welcome to React Native Voice!
         </Text>
-        {/* <Text style={styles.instructions}>
-          Press the button and start speaking.
-        </Text> */}
+         <Text style={styles.instructions}>
+          {this.state.status}
+        </Text> 
         <Text
           style={styles.stat}>
           {`Started: ${this.state.started}`}
